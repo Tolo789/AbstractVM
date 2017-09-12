@@ -1,6 +1,7 @@
 #ifndef ABSTRACTVM_HPP
 # define ABSTRACTVM_HPP
 # include <iostream>
+# include <list>
 
 class AbstractVM {
 
@@ -12,18 +13,16 @@ public:
 
 	AbstractVM& operator=(AbstractVM const & rhs);
 
-	char *getOptions() const;
-	char *getProgram() const;
-	
-	int parseOptions(int argc, char **argv);
+	std::list<char>			getOptions() const;
+	std::list<std::string>	getProgram() const;
 
-	std::string const  serialize(void) const;
+	std::string const	serialize(void) const;
 
-	class FilepathNumberException : public std::exception
+	class UnkownOptionException : public std::exception
 	{
 		virtual const char* what() const throw();
 	};
-	class UnknownArgumentException : public std::exception
+	class FilepathNumberException : public std::exception
 	{
 		virtual const char* what() const throw();
 	};
@@ -31,10 +30,12 @@ public:
 private:
 	AbstractVM(void);
 
-	char	*options;
-	int		optionsSize;
-	char	*program;
-	int		programLines;
+	int	 parseOptions(int argc, char **argv);
+	void getProgramFromFile(char *filePath);
+	void getProgramFromStdInput(void);
+
+	std::list<char>			options;
+	std::list<std::string>	program;
 
 };
 

@@ -14,13 +14,6 @@ AbstractVM::AbstractVM(int argc, char **argv) {
 	// TODO
 	std::cout << "AbstractVM standard constructor called" << std::endl;
 
-	// TODO: may switch to list/forward_list ?
-	this->options = NULL;
-	this->optionsSize = 0;
-	this->program = NULL;
-	this->programLines = 0;
-
-	// TODO: get options
 	int filepathIndex = this->parseOptions(argc, argv);
 	// TODO: get program
 	if (filepathIndex == 0) {
@@ -54,7 +47,6 @@ AbstractVM::~AbstractVM(void) {
 
 AbstractVM& AbstractVM::operator=(AbstractVM const & rhs) {
 	std::cout << "AbstractVM assignation operator called" << std::endl;
-	// TODO
 	this->options = rhs.getOptions();
 	this->program = rhs.getProgram();
 
@@ -62,7 +54,6 @@ AbstractVM& AbstractVM::operator=(AbstractVM const & rhs) {
 }
 
 std::ostream & operator<<(std::ostream & o, AbstractVM const & rhs) {
-	// TODO
 	o << rhs.serialize();
 
 	return o;
@@ -72,13 +63,13 @@ std::ostream & operator<<(std::ostream & o, AbstractVM const & rhs) {
 
 // === GET / SET ===============================================================
 
-	char *AbstractVM::getOptions() const {
-		return this->options;
-	}
+std::list<char>			AbstractVM::getOptions() const {
+	return this->options;
+}
 
-	char *AbstractVM::getProgram() const {
-		return this->program;
-	}
+std::list<std::string>	AbstractVM::getProgram() const {
+	return this->program;
+}
 
 // === END GET / SET ===========================================================
 
@@ -89,7 +80,18 @@ int AbstractVM::parseOptions(int argc, char **argv) {
 
 	int i = 0;
 	while (++i < argc) {
-		if (argv[i][0] == '.') {
+		if (argv[i][0] == '-') {
+			if (argv[i][1] == 'd') {
+				if (argv[i][2] != 0) {
+					throw AbstractVM::UnkownOptionException();
+				}
+				this->options.push_front(argv[i][1]);
+			}
+			else {
+				throw AbstractVM::UnkownOptionException();
+			}
+		}
+		else {
 			if (filepathIndex == 0) {
 				filepathIndex = i;
 			}
@@ -97,20 +99,32 @@ int AbstractVM::parseOptions(int argc, char **argv) {
 				throw AbstractVM::FilepathNumberException();
 			}
 		}
-		else if (argv[i][0] == '-') {
-			// TODO: check if valid option
-		}
-		else {
-			throw AbstractVM::UnknownArgumentException();
-		}
 	}
+
 	return filepathIndex;
 }
 
 std::string const AbstractVM::serialize(void) const {
-	// TODO
 	std::stringstream debug_str;
-	debug_str << "AbstractVM{}";
+	debug_str << "AbstractVM{";
+
+	debug_str << "Options:{";
+	for (std::list<char>::iterator it = this->options.begin(); it != this->options.end(); ++it) {
+		if (it != this->options.begin())
+			debug_str << ", ";
+		debug_str << '-' << *it;
+	}
+	debug_str << "}";
+
+	debug_str << ", Program:{";
+	for (std::list<std::string>::iterator it = this->program.begin(); it != this->program.end(); ++it) {
+		if (it != this->program.begin())
+			debug_str << " \\n ";
+		debug_str << *it;
+	}
+	debug_str << "}";
+
+	debug_str << "}";
 
 	return debug_str.str();
 }
@@ -122,12 +136,12 @@ std::string const AbstractVM::serialize(void) const {
 
 // === EXCEPTIONS ==============================================================
 
-const char *AbstractVM::FilepathNumberException::what() const throw() {
-		return "More than one filepath given..!";
+const char *AbstractVM::UnkownOptionException::what() const throw() {
+		return "Unknown option given..!";
 }
 
-const char *AbstractVM::UnknownArgumentException::what() const throw() {
-		return "Unknown argument given..!";
+const char *AbstractVM::FilepathNumberException::what() const throw() {
+		return "More than one filepath given..!";
 }
 
 // === END EXCEPTIONS ==========================================================
