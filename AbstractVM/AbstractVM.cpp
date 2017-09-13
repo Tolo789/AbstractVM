@@ -1,26 +1,27 @@
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include "AbstractVM.hpp"
 
 // === CONSTRUCTOR =============================================================
 
 AbstractVM::AbstractVM(void) {
-	std::cout << "AbstractVM default constructor called" << std::endl;
+	// std::cout << "AbstractVM default constructor called" << std::endl;
 
 	return ;
 }
 
 AbstractVM::AbstractVM(int argc, char **argv) {
-	// TODO
-	std::cout << "AbstractVM standard constructor called" << std::endl;
+	// std::cout << "AbstractVM standard constructor called" << std::endl;
 
-	int filepathIndex = this->parseOptions(argc, argv);
-	// TODO: get program
+	int filepathIndex;
+
+	filepathIndex = this->parseOptions(argc, argv);
 	if (filepathIndex == 0) {
-		// TODO: get program from standar input
+		this->getProgramFromStdInput();
 	}
 	else {
-		// TODO: get program from file (argv[filepathIndex])
+		this->getProgramFromFile(argv[filepathIndex]);
 	}
 
 	// TODO: lexer
@@ -29,14 +30,14 @@ AbstractVM::AbstractVM(int argc, char **argv) {
 }
 
 AbstractVM::AbstractVM(AbstractVM const & src) {
-	std::cout << "AbstractVM copy constructor called" << std::endl;
+	// std::cout << "AbstractVM copy constructor called" << std::endl;
 	*this = src;
 
 	return ;
 }
 
 AbstractVM::~AbstractVM(void) {
-	std::cout << "AbstractVM destructor called" << std::endl;
+	// std::cout << "AbstractVM destructor called" << std::endl;
 
 	return ;
 }
@@ -46,7 +47,7 @@ AbstractVM::~AbstractVM(void) {
 // === OPERATORS ===============================================================
 
 AbstractVM& AbstractVM::operator=(AbstractVM const & rhs) {
-	std::cout << "AbstractVM assignation operator called" << std::endl;
+	// std::cout << "AbstractVM assignation operator called" << std::endl;
 	this->options = rhs.getOptions();
 	this->program = rhs.getProgram();
 
@@ -104,12 +105,38 @@ int AbstractVM::parseOptions(int argc, char **argv) {
 	return filepathIndex;
 }
 
+void AbstractVM::getProgramFromStdInput(void) {
+	std::string line = "";
+	while (std::getline(std::cin, line)) {
+		if (line == ";;")
+			break;
+		this->program.push_back(line);
+	}
+
+	return ;
+}
+
+void AbstractVM::getProgramFromFile(char *filePath) {
+	std::string line;
+	std::ifstream input_file (filePath);
+	if (input_file.is_open()) {
+		while (std::getline(input_file, line))
+		{
+			this->program.push_back(line);
+		}
+	}
+	else
+		throw AbstractVM::FileNameException();
+
+	return ;
+}
+
 std::string const AbstractVM::serialize(void) const {
 	std::stringstream debug_str;
-	debug_str << "AbstractVM{";
+	debug_str << "AbstractVM:{";
 
 	debug_str << "Options:{";
-	for (std::list<char>::iterator it = this->options.begin(); it != this->options.end(); ++it) {
+	for (std::list<char>::const_iterator it = this->options.begin(); it != this->options.end(); ++it) {
 		if (it != this->options.begin())
 			debug_str << ", ";
 		debug_str << '-' << *it;
@@ -117,7 +144,7 @@ std::string const AbstractVM::serialize(void) const {
 	debug_str << "}";
 
 	debug_str << ", Program:{";
-	for (std::list<std::string>::iterator it = this->program.begin(); it != this->program.end(); ++it) {
+	for (std::list<std::string>::const_iterator it = this->program.begin(); it != this->program.end(); ++it) {
 		if (it != this->program.begin())
 			debug_str << " \\n ";
 		debug_str << *it;
@@ -142,6 +169,10 @@ const char *AbstractVM::UnkownOptionException::what() const throw() {
 
 const char *AbstractVM::FilepathNumberException::what() const throw() {
 		return "More than one filepath given..!";
+}
+
+const char *AbstractVM::FileNameException::what() const throw() {
+		return "Cannot open the file at the given path..!";
 }
 
 // === END EXCEPTIONS ==========================================================

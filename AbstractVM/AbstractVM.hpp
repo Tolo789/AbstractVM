@@ -26,6 +26,10 @@ public:
 	{
 		virtual const char* what() const throw();
 	};
+	class FileNameException : public std::exception
+	{
+		virtual const char* what() const throw();
+	};
 
 private:
 	AbstractVM(void);
