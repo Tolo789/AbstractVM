@@ -34,9 +34,11 @@ public:
 private:
 	AbstractVM(void);
 
-	int	 parseOptions(int argc, char **argv);
-	void getProgramFromFile(char *filePath);
-	void getProgramFromStdInput(void);
+	int						parseOptions(int argc, char **argv);
+	void					getProgramFromFile(char *filePath);
+	void					getProgramFromStdInput(void);
+	void					trimProgram(void);
+	std::list<std::string>	lexerCheck(void);
 
 	std::list<char>			options;
 	std::list<std::string>	program;

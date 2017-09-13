@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <string>
 #include "AbstractVM.hpp"
 
 // === CONSTRUCTOR =============================================================
@@ -23,8 +24,11 @@ AbstractVM::AbstractVM(int argc, char **argv) {
 	else {
 		this->getProgramFromFile(argv[filepathIndex]);
 	}
+	this->trimProgram();
 
 	// TODO: lexer
+	std::list<std::string> errorList;
+	errorList = this->lexerCheck();
 
 	return ;
 }
@@ -129,6 +133,70 @@ void AbstractVM::getProgramFromFile(char *filePath) {
 		throw AbstractVM::FileNameException();
 
 	return ;
+}
+
+void	AbstractVM::trimProgram(void) {
+	size_t index;
+	for (std::list<std::string>::iterator it = this->program.begin(); it != this->program.end(); ++it) {
+		// trim spaces before arguments
+		index = it->find(" ", 0);
+		while (index == 0) {
+			it->replace(index, 1, "");
+			index = it->find("  ", index);
+		}
+
+		// trim spaces between arguments
+		index = it->find("  ", 0);
+		while (index != std::string::npos) {
+			it->replace(index, 2, " ");
+			index = it->find("  ", index);
+		}
+
+		// trim spaces after arguments
+		index = it->find_last_of(" ");
+		if (index == it->size() - 1)
+			it->replace(index, 1, "");
+	}
+
+	return ;
+}
+
+std::list<std::string>	AbstractVM::lexerCheck(void) {
+	std::list<std::string> errorList;
+
+	std::string first;
+	std::string second;
+	std::string third;
+	std::size_t index_old;
+	std::size_t index;
+	for (std::list<std::string>::iterator it = this->program.begin(); it != this->program.end(); ++it) {
+		index_old = 0;
+		first = "";
+		second = "";
+		third = "";
+
+		index = it->find(' ', index_old);
+		first = it->substr(index_old, index);
+
+		if (index != std::string::npos) {
+
+			if (index != std::string::npos) {
+				index_old = index;
+				index = it->find(' ', index_old);
+				second = it->substr(index_old, index);
+
+				if (index != std::string::npos) {
+					index_old = index;
+					index = it->find(' ', index_old);
+					third = it->substr(index_old, index);
+				}
+			}
+		}
+
+		// std::cout << "First: " << first << ", Second: " << second << ", Third: " << third << std::endl;
+	}
+
+	return errorList;
 }
 
 std::string const AbstractVM::serialize(void) const {
