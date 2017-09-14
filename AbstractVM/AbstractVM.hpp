@@ -2,6 +2,7 @@
 # define ABSTRACTVM_HPP
 # include <iostream>
 # include <list>
+# include <map>
 
 class AbstractVM {
 
@@ -30,8 +31,24 @@ public:
 	{
 		virtual const char* what() const throw();
 	};
+	class LexerException : public std::exception
+	{
+		public:
+			LexerException(std::list<std::string> errorList);
+			~LexerException() _NOEXCEPT;
+
+		private:
+
+			virtual const char* what() const throw();
+
+			std::string errorMsg;
+	};
 
 private:
+
+    static std::map<std::string,int> const create_map(void);
+	static std::map<std::string, int> const INSTR;
+
 	AbstractVM(void);
 
 	int						parseOptions(int argc, char **argv);
@@ -39,6 +56,7 @@ private:
 	void					getProgramFromStdInput(void);
 	void					trimProgram(void);
 	std::list<std::string>	lexerCheck(void);
+	std::list<std::string>	getLineElements(std::string line);
 
 	std::list<char>			options;
 	std::list<std::string>	program;
