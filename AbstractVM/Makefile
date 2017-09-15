@@ -3,7 +3,10 @@ NAME = avm
 SDIR = ./
 
 SRC = $(SDIR)main.cpp \
-	  $(SDIR)AbstractVM.cpp
+	  $(SDIR)AbstractVM.cpp \
+	  $(SDIR)AProgramReader.cpp \
+	  $(SDIR)Lexer.cpp \
+	  $(SDIR)Parser.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
