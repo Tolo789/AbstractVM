@@ -233,15 +233,15 @@ std::string const AbstractVM::serialize(void) const {
 // === EXCEPTIONS ==============================================================
 
 const char *AbstractVM::UnkownOptionException::what() const throw() {
-		return "Unknown option given..!\n";
+		return "Unknown option given..!";
 }
 
 const char *AbstractVM::FilepathNumberException::what() const throw() {
-		return "More than one filepath given..!\n";
+		return "More than one filepath given..!";
 }
 
 const char *AbstractVM::FileNameException::what() const throw() {
-		return "Cannot open the file at the given path..!\n";
+		return "Cannot open the file at the given path..!";
 }
 
 // === END EXCEPTIONS ==========================================================

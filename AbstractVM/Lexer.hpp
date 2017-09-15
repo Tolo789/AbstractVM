@@ -26,7 +26,7 @@ public:
 	};
 
 private:
-	static std::string createError(int lineCount, std::string errorMsg, std::string strGiven);
+	static std::string createError(int lineCount, std::string errorMsg, std::string strGiven, std::size_t listSize);
 };
 
 #endif

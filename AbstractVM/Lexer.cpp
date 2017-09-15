@@ -13,8 +13,10 @@
 
 // === OTHERS ==================================================================
 
-std::string Lexer::createError(int lineCount, std::string errorMsg, std::string strGiven) {
+std::string Lexer::createError(int lineCount, std::string errorMsg, std::string strGiven, std::size_t listSize) {
 	std::stringstream errorStr;
+	if (listSize > 0)
+		errorStr << std::endl;
 	errorStr << "ERROR - Line " << lineCount << " - " << errorMsg << " ('" << strGiven << "' given)";
 
 	return errorStr.str();
@@ -29,7 +31,7 @@ void Lexer::execute(std::list<std::string> program, std::list<char> options) {
 
 	std::list<std::string>::const_iterator		lineIterator;
 	std::list<std::string>::const_iterator		elemIterator;
-	std::map<std::string,int>::const_iterator	mapResult;
+	std::map<std::string,int>::const_iterator	instrMapResult;
 
 	std::size_t lineCount = 0;
 	std::size_t elemCount = 0;
@@ -48,34 +50,41 @@ void Lexer::execute(std::list<std::string> program, std::list<char> options) {
 
 			if (elemCount == 1) {
 				param_needed = false;
-				mapResult = Lexer::INSTR.find(*elemIterator);
-				if (mapResult == Lexer::INSTR.end()) {
-					errorList.push_back(Lexer::createError(lineCount, "Unknown instruction", *elemIterator));
+				instrMapResult = Lexer::INSTR.find(*elemIterator);
+				if (instrMapResult == Lexer::INSTR.end()) {
+					errorList.push_back(Lexer::createError(lineCount, "Unknown instruction", *elemIterator, errorList.size()));
 
 					break ;
 				}
-				else if (mapResult->second == 1)
+				else if (instrMapResult->second == 1)
 					param_needed = true;
 			}
 			else if (elemCount == 2) {
 				if (param_needed == true) {
 					if (*elemIterator == "" or elemIterator->substr(0, 1) == ";") {
-						errorList.push_back(Lexer::createError(lineCount, "Instruction needs a parameter", *elemIterator));
+						errorList.push_back(Lexer::createError(lineCount, "Instruction needs a parameter", *elemIterator, errorList.size()));
 
 						break ;
 					}
-					// TODO: check that the given param is good
+
+					try {
+						eOperandType opType = AProgramReader::getOperandType(*elemIterator);
+						AProgramReader::getOperandValue(*elemIterator, opType);
+					}
+					catch (std::exception & e) {
+						errorList.push_back(Lexer::createError(lineCount, e.what(), *elemIterator, errorList.size()));
+					}
 				}
 				else {
 					if (*elemIterator != "" and elemIterator->substr(0, 1) != ";") {
-						errorList.push_back(Lexer::createError(lineCount, "Instruction doesnt need any parameter", *elemIterator));
+						errorList.push_back(Lexer::createError(lineCount, "Instruction doesnt need any parameter", *elemIterator, errorList.size()));
 
 						break ;
 					}
 				}
 			}
 			else if (*elemIterator != "" and elemIterator->substr(0, 1) != ";") {
-				errorList.push_back(Lexer::createError(lineCount, "Instruction doesnt need any other parameter", *elemIterator));
+				errorList.push_back(Lexer::createError(lineCount, "Instruction doesnt need any other parameter", *elemIterator, errorList.size()));
 			}
 		}
 	}
@@ -102,7 +111,7 @@ std::string const Lexer::serialize(void) const {
 Lexer::LexerException::LexerException(std::list<std::string> errorList) {
 	for (std::list<std::string>::const_iterator it = errorList.begin(); it != errorList.end(); ++it) {
 		if (*it != "")
-			this->errorMsg += *it + "\n";
+			this->errorMsg += *it;
 	}
 }
 

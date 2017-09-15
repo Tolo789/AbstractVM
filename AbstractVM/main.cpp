@@ -6,9 +6,8 @@ int main(int argc, char **argv) {
 	try {
 		AbstractVM avm = AbstractVM(argc, argv);
 	}
-	catch (std::exception & e)
-	{
-		std::cout << e.what() ;
+	catch (std::exception & e) {
+		std::cout << e.what() << std::endl;
 		exit (EXIT_FAILURE);
 	}
 
