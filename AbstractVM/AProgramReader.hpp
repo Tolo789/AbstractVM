@@ -34,8 +34,8 @@ public:
 	};
 
 protected:
-	static std::map<std::string, int> const	INSTR;
-    static std::map<std::string, int> const	create_instr_map(void);
+	static std::map<std::string, bool> const	INSTR;
+    static std::map<std::string, bool> const	create_instr_map(void);
 
 	static double const		MAX_VAL[5];
 	static std::map<std::string, eOperandType> const	OPERAND;

@@ -180,25 +180,25 @@ std::string const AProgramReader::serialize(void) const {
 
 // === STATICVARS ==============================================================
 
-std::map<std::string, int> const AProgramReader::create_instr_map(void) {
-	std::map<std::string, int> m;
+std::map<std::string, bool> const AProgramReader::create_instr_map(void) {
+	std::map<std::string, bool> m;
 
-	m["push"] = 1;
-	m["pop"] = 0;
-	m["dump"] = 0;
-	m["assert"] = 1;
-	m["add"] = 0;
-	m["sub"] = 0;
-	m["mul"] = 0;
-	m["div"] = 0;
-	m["mod"] = 0;
-	m["print"] = 0;
-	m["exit"] = 0;
+	m["push"] = true;
+	m["pop"] = false;
+	m["dump"] = false;
+	m["assert"] = true;
+	m["add"] = false;
+	m["sub"] = false;
+	m["mul"] = false;
+	m["div"] = false;
+	m["mod"] = false;
+	m["print"] = false;
+	m["exit"] = false;
 
 	return m;
 }
 
-std::map<std::string, int> const AProgramReader::INSTR = AProgramReader::create_instr_map();
+std::map<std::string, bool> const AProgramReader::INSTR = AProgramReader::create_instr_map();
 
 
 std::map<std::string, eOperandType> const AProgramReader::create_operand_map(void) {

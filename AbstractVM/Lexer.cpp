@@ -31,7 +31,7 @@ void Lexer::execute(std::list<std::string> program, std::list<char> options) {
 
 	std::list<std::string>::const_iterator		lineIterator;
 	std::list<std::string>::const_iterator		elemIterator;
-	std::map<std::string,int>::const_iterator	instrMapResult;
+	std::map<std::string,bool>::const_iterator	instrMapResult;
 
 	std::size_t lineCount = 0;
 	std::size_t elemCount = 0;
@@ -50,13 +50,13 @@ void Lexer::execute(std::list<std::string> program, std::list<char> options) {
 
 			if (elemCount == 1) {
 				param_needed = false;
-				instrMapResult = Lexer::INSTR.find(*elemIterator);
-				if (instrMapResult == Lexer::INSTR.end()) {
+				instrMapResult = AProgramReader::INSTR.find(*elemIterator);
+				if (instrMapResult == AProgramReader::INSTR.end()) {
 					errorList.push_back(Lexer::createError(lineCount, "Unknown instruction", *elemIterator, errorList.size()));
 
 					break ;
 				}
-				else if (instrMapResult->second == 1)
+				else if (instrMapResult->second)
 					param_needed = true;
 			}
 			else if (elemCount == 2) {
