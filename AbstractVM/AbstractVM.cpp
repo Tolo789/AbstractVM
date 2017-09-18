@@ -187,7 +187,6 @@ void	AbstractVM::runVM(void) {
 		std::cout << "\t-d  ->  debug mode while executing the program" << std::endl;
 	}
 	else {
-		// TODO: lexer
 		this->lexer.execute(this->program, this->options);
 
 		// TODO: parser
@@ -195,7 +194,7 @@ void	AbstractVM::runVM(void) {
 	}
 
 	// TODO: delete this line
-	std::cout << std::endl << *this << std::endl;
+	// std::cout << std::endl << *this << std::endl;
 
 	return ;
 }

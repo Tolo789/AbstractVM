@@ -156,14 +156,15 @@ std::string AProgramReader::getOperandValue(std::string opStr, eOperandType opTy
 		throw AProgramReader::OperandValueException();
 
 	// TODO: implement this solution when you do stack operations
+	double valueCheck;
 	try {
-	 	double valueCheck = std::stod(value);
-		if (valueCheck > AProgramReader::MAX_VAL[opType] || valueCheck < (- AProgramReader::MAX_VAL[opType] - 1))
-			throw AProgramReader::OperandOverflowException();
+	 	valueCheck = std::stod(value);
 	}
 	catch (std::exception & e) {
 		throw AProgramReader::OperandOverflowException();
 	}
+	if (valueCheck > AProgramReader::MAX_VAL[opType] || valueCheck < (-AProgramReader::MAX_VAL[opType] - 1))
+		throw AProgramReader::OperandOverflowException();
 
 	return value;
 }
@@ -212,7 +213,7 @@ std::map<std::string, eOperandType> const AProgramReader::create_operand_map(voi
 	return m;
 }
 
-double const AProgramReader::MAX_VAL[5] = {1 << 6, 1 << 14, 1 << 30, std::numeric_limits<float>::max(), std::numeric_limits<double>::max()};
+double const AProgramReader::MAX_VAL[5] = {std::numeric_limits<char>::max(), std::numeric_limits<short>::max(), std::numeric_limits<int>::max(), std::numeric_limits<float>::max(), std::numeric_limits<double>::max()};
 std::map<std::string, eOperandType> const AProgramReader::OPERAND = AProgramReader::create_operand_map();
 
 // === END STATICVARS ==========================================================
