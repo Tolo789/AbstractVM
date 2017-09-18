@@ -1,8 +1,16 @@
 #include <iostream>
 #include <sstream>
 #include "Parser.hpp"
+#include "Operand.tpp"
 
 // === CONSTRUCTOR =============================================================
+
+Parser::~Parser (void) {
+	for (std::list<IOperand*>::iterator elem = this->values.begin(); elem != this->values.end(); ++elem) {
+		delete(*elem);
+	}
+	this->values.clear();
+}
 // === ENDCONSTRUCTOR ==========================================================
 
 // === OPERATORS ===============================================================
@@ -23,7 +31,8 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 	std::size_t								lineCount = 0;
 	std::size_t								elemCount = 0;
 
-	instrFuncPointer	instrFunc;
+	std::map<std::string, Parser::instrFuncPointer>::const_iterator	instrMapResult;
+	Parser::instrFuncPointer	instrFunc;
 	std::string			param;
 
 	for (std::list<std::string>::const_iterator lineIterator = program.begin(); lineIterator != program.end(); ++lineIterator) {
@@ -48,22 +57,55 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 				break ;
 
 			if (elemCount == 1) {
-				instrFunc = Parser::INSTR_FUNC_MAP.find(*elemIterator)->second;
-				param = Parser::INSTR_FUNC_MAP.find(*elemIterator)->first;
+				instrMapResult = Parser::INSTR_FUNC_MAP.find(*elemIterator);
+				instrFunc = instrMapResult->second;
+				param = instrMapResult->first;
 			}
 			else {
 				param = *elemIterator;
 			}
 		}
-		std::cout << "Func: " << instrFunc << ", param: " << param << std::endl;
-		// this->instrFunc(param);
+		// std::cout << "Func: " << instrMapResult->first << ", funcName: " << instrMapResult->second << std::endl;
+		(this->*instrFunc)(param);
 	}
 }
+
+
+IOperand const * Parser::createOperand( eOperandType type, std::string const & value ) const {
+	Parser::opFuncCreatePointer opCreateFunc = Parser::OP_FUNC_MAP.find(type)->second;
+
+	return (this->*opCreateFunc)(value);
+}
+IOperand const * Parser::createInt8( std::string const & value ) const {
+	return new Operand<Int8>(value);
+}
+IOperand const * Parser::createInt16( std::string const & value ) const {
+	return new Operand<Int16>(value);
+}
+IOperand const * Parser::createInt32( std::string const & value ) const {
+	return new Operand<Int32>(value);
+}
+IOperand const * Parser::createFloat( std::string const & value ) const {
+	return new Operand<Float>(value);
+}
+IOperand const * Parser::createDouble( std::string const & value ) const {
+	return new Operand<Double>(value);
+}
+
 
 void Parser::PushFunction(std::string param) {
 	std::cout << "Push" << std::endl;
 	if (param != "")
 		return ;
+
+
+	// eOperandType opType = AProgramReader::getOperandType(param);
+	// std::string	valueStr = AProgramReader::getOperandValue(param, opType);
+	//
+	// IOperand newOperand = this->createOperand(opType, valueStr);
+	// std::cout << "Test: " << newOperand->toString() << std::endl;
+
+
 
 	return;
 }
@@ -96,7 +138,7 @@ std::string const Parser::serialize(void) const {
 // === STATICVARS ==============================================================
 
 std::map<std::string, Parser::instrFuncPointer> const Parser::create_instr_func_map(void) {
-	std::map<std::string, instrFuncPointer> m;
+	std::map<std::string, Parser::instrFuncPointer> m;
 
 	m["push"] = &Parser::PushFunction;
 	m["pop"] = &Parser::PopFunction;
@@ -114,6 +156,20 @@ std::map<std::string, Parser::instrFuncPointer> const Parser::create_instr_func_
 }
 
 std::map<std::string, Parser::instrFuncPointer> const Parser::INSTR_FUNC_MAP = Parser::create_instr_func_map();
+
+std::map<eOperandType, Parser::opFuncCreatePointer> const Parser::create_op_func_map(void) {
+	std::map<eOperandType, Parser::opFuncCreatePointer> m;
+
+	m[Int8] = &Parser::createInt8;
+	m[Int16] = &Parser::createInt16;
+	m[Int32] = &Parser::createInt32;
+	m[Float] = &Parser::createFloat;
+	m[Double] = &Parser::createDouble;
+
+	return m;
+}
+
+std::map<eOperandType, Parser::opFuncCreatePointer> const Parser::OP_FUNC_MAP = Parser::create_op_func_map();
 
 // === END STATICVARS ==========================================================
 
