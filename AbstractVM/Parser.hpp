@@ -61,7 +61,13 @@ private:
 	void ModFunction(std::string param);
 	void PrintFunction(std::string param);
 	void ExitFunction(std::string param);
+	// Bonus
 	void ClearFunction(std::string param);
+	void AndFunction(std::string param);
+	void OrFunction(std::string param);
+	void XorFunction(std::string param);
+	void PowFunction(std::string param);
+	void SqrtFunction(std::string param);
 
 	std::list<char>				options;
 	std::list<IOperand const *>	values;

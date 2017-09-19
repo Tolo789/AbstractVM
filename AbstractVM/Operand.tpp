@@ -87,6 +87,54 @@ public:
 		return this->factory.createOperand(rhs.getType(), std::to_string(static_cast<int>(this->value) % static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
 	}
 
+	IOperand const * operator&( IOperand const & rhs ) const {
+		if (static_cast<Operand<Double> const &>(rhs).getValue() == 0)
+			throw ZeroDivisionException();
+
+		if (rhs.getType() < this->getType()) {
+			if (this->getType() >= Float)
+				throw Operand::IntegerOnlyException();
+
+			return this->factory.createOperand(this->getType(), std::to_string(static_cast<int>(this->value) & static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
+		}
+		if (rhs.getType() >= Float)
+			throw Operand::IntegerOnlyException();
+
+		return this->factory.createOperand(rhs.getType(), std::to_string(static_cast<int>(this->value) & static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
+	}
+
+	IOperand const * operator|( IOperand const & rhs ) const {
+		if (static_cast<Operand<Double> const &>(rhs).getValue() == 0)
+			throw ZeroDivisionException();
+
+		if (rhs.getType() < this->getType()) {
+			if (this->getType() >= Float)
+				throw Operand::IntegerOnlyException();
+
+			return this->factory.createOperand(this->getType(), std::to_string(static_cast<int>(this->value) | static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
+		}
+		if (rhs.getType() >= Float)
+			throw Operand::IntegerOnlyException();
+
+		return this->factory.createOperand(rhs.getType(), std::to_string(static_cast<int>(this->value) | static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
+	}
+
+	IOperand const * operator^( IOperand const & rhs ) const {
+		if (static_cast<Operand<Double> const &>(rhs).getValue() == 0)
+			throw ZeroDivisionException();
+
+		if (rhs.getType() < this->getType()) {
+			if (this->getType() >= Float)
+				throw Operand::IntegerOnlyException();
+
+			return this->factory.createOperand(this->getType(), std::to_string(static_cast<int>(this->value) ^ static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
+		}
+		if (rhs.getType() >= Float)
+			throw Operand::IntegerOnlyException();
+
+		return this->factory.createOperand(rhs.getType(), std::to_string(static_cast<int>(this->value) ^ static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
+	}
+
 	std::string const & toString( void ) const {
 			std::stringstream debugStr;
 			debugStr << "Operand:{value:" << this->value << ", type:" << this->type << "}";

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <math.h>
 #include "Parser.hpp"
 #include "Operand.tpp"
 
@@ -267,6 +268,104 @@ void Parser::ClearFunction(std::string param) {
 	return;
 }
 
+void Parser::AndFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
+	IOperand const *newOperand = (**second) & (**first);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
+void Parser::OrFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
+	IOperand const *newOperand = (**second) | (**first);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
+void Parser::XorFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
+	IOperand const *newOperand = (**second) ^ (**first);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
+void Parser::PowFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
+
+	eOperandType opType = ((*first)->getType() > (*second)->getType()) ? (*first)->getType() : (*second)->getType();
+	double firstVal = static_cast<Operand<Double> const *>(*first)->getValue();
+	double secondVal = static_cast<Operand<Double> const *>(*second)->getValue();
+	std::string	valueStr = std::to_string(pow(secondVal, firstVal));
+
+	IOperand const *newOperand = this->factory.createOperand(opType, valueStr);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
+void Parser::SqrtFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 1)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+
+	eOperandType opType = (*first)->getType();
+	std::string	valueStr = std::to_string(sqrt(static_cast<Operand<Double> const *>(*first)->getValue()));
+
+	IOperand const *newOperand = this->factory.createOperand(opType, valueStr);
+
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
 std::string const Parser::serialize(void) const {
 	std::stringstream debugStr;
 	debugStr << "Parser:{}";
@@ -294,6 +393,11 @@ std::map<std::string, Parser::instrFuncPointer> const Parser::create_instr_func_
 	m["exit"] = &Parser::ExitFunction;
 	// Bonus
 	m["clear"] = &Parser::ClearFunction;
+	m["and"] = &Parser::AndFunction;
+	m["or"] = &Parser::OrFunction;
+	m["xor"] = &Parser::XorFunction;
+	m["pow"] = &Parser::PowFunction;
+	m["sqrt"] = &Parser::SqrtFunction;
 
 	return m;
 }

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <limits>
 #include "OperandFactory.hpp"
 #include "Operand.tpp"
 

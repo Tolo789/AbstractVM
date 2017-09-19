@@ -1,7 +1,85 @@
+; Add test
+push int8(-120)
+push int8(40)
+dump
+add
+dump
+
+; Sub test
+clear
+push int8(120)
 push int32(40)
-push int8(6)
+dump
+
+; Mul test
+clear
+push int8(-12)
+push int8(4)
+dump
+mul
+dump
+
+; Div test
+clear
+push int8(-120)
+push int8(40)
+dump
+div
+dump
+
+; Mod test
+clear
+push int8(10)
+push int8(4)
 dump
 mod
 dump
+
+; Print test
+clear
+push int8(42)
+push int8(40)
+dump
+print
+pop
+print
+dump
+
+
+; And test
+clear
+push int8(19)
+push int8(9)
+and
+dump
+
+; And test
+clear
+push int8(19)
+push int8(9)
+or
+dump
+
+; xor test
+clear
+push int8(19)
+push int8(9)
+xor
+dump
+
+; pow test
+clear
+push double(32.01)
+push double(1.54)
+pow
+dump
+
+; sqrt test
+clear
+push double(10.0)
+sqrt
+dump
+
+
 
 exit

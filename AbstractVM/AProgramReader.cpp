@@ -1,6 +1,5 @@
 #include <iostream>
 #include <sstream>
-#include <limits>
 #include "AProgramReader.hpp"
 
 // === CONSTRUCTOR =============================================================
@@ -185,7 +184,13 @@ std::map<std::string, bool> const AProgramReader::create_instr_map(void) {
 	m["mod"] = false;
 	m["print"] = false;
 	m["exit"] = false;
+	// Bonus
 	m["clear"] = false;
+	m["and"] = false;
+	m["or"] = false;
+	m["xor"] = false;
+	m["pow"] = false;
+	m["sqrt"] = false;
 
 	return m;
 }
