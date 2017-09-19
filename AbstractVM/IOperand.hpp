@@ -17,9 +17,6 @@ public:
 
 	virtual ~IOperand( void ) {}
 
-	// TODO: should I keep it?
-	double			value;
-
 };
 
 #endif

@@ -185,6 +185,7 @@ std::map<std::string, bool> const AProgramReader::create_instr_map(void) {
 	m["mod"] = false;
 	m["print"] = false;
 	m["exit"] = false;
+	m["clear"] = false;
 
 	return m;
 }

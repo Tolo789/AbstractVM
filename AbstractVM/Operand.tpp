@@ -30,58 +30,61 @@ public:
 	eOperandType getType(void) const {
 		return this->type;
 	}
+	double getValue(void) const {
+		return this->value;
+	}
 
 
 	IOperand const * operator+( IOperand const & rhs ) const {
 		if (rhs.getType() < this->getType()) {
-			return this->factory.createOperand(this->getType(), std::to_string(this->value + rhs.value));
+			return this->factory.createOperand(this->getType(), std::to_string(this->value + static_cast<Operand<Double> const &>(rhs).getValue()));
 		}
 
-		return this->factory.createOperand(rhs.getType(), std::to_string(this->value + rhs.value));
+		return this->factory.createOperand(rhs.getType(), std::to_string(this->value + static_cast<Operand<Double> const &>(rhs).getValue()));
 	}
 
 	IOperand const * operator-( IOperand const & rhs ) const {
 		if (rhs.getType() < this->getType()) {
-			return this->factory.createOperand(this->getType(), std::to_string(this->value - rhs.value));
+			return this->factory.createOperand(this->getType(), std::to_string(this->value - static_cast<Operand<Double> const &>(rhs).getValue()));
 		}
 
-		return this->factory.createOperand(rhs.getType(), std::to_string(this->value - rhs.value));
+		return this->factory.createOperand(rhs.getType(), std::to_string(this->value - static_cast<Operand<Double> const &>(rhs).getValue()));
 	}
 
 	IOperand const * operator*( IOperand const & rhs ) const {
 		if (rhs.getType() < this->getType()) {
-			return this->factory.createOperand(this->getType(), std::to_string(this->value *rhs.value));
+			return this->factory.createOperand(this->getType(), std::to_string(this->value *static_cast<Operand<Double> const &>(rhs).getValue()));
 		}
 
-		return this->factory.createOperand(rhs.getType(), std::to_string(this->value * rhs.value));
+		return this->factory.createOperand(rhs.getType(), std::to_string(this->value * static_cast<Operand<Double> const &>(rhs).getValue()));
 	}
 
 	IOperand const * operator/( IOperand const & rhs ) const {
-		if (rhs.value == 0)
+		if (static_cast<Operand<Double> const &>(rhs).getValue() == 0)
 			throw ZeroDivisionException();
 
 		if (rhs.getType() < this->getType()) {
 
-			return this->factory.createOperand(this->getType(), std::to_string(this->value / rhs.value));
+			return this->factory.createOperand(this->getType(), std::to_string(this->value / static_cast<Operand<Double> const &>(rhs).getValue()));
 		}
 
-		return this->factory.createOperand(rhs.getType(), std::to_string(this->value / rhs.value));
+		return this->factory.createOperand(rhs.getType(), std::to_string(this->value / static_cast<Operand<Double> const &>(rhs).getValue()));
 	}
 
 	IOperand const * operator%( IOperand const & rhs ) const {
-		if (rhs.value == 0)
+		if (static_cast<Operand<Double> const &>(rhs).getValue() == 0)
 			throw ZeroDivisionException();
 
 		if (rhs.getType() < this->getType()) {
 			if (this->getType() >= Float)
 				throw Operand::IntegerOnlyException();
 
-			return this->factory.createOperand(this->getType(), std::to_string(static_cast<int>(this->value) % static_cast<int>(rhs.value)));
+			return this->factory.createOperand(this->getType(), std::to_string(static_cast<int>(this->value) % static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
 		}
 		if (rhs.getType() >= Float)
 			throw Operand::IntegerOnlyException();
 
-		return this->factory.createOperand(rhs.getType(), std::to_string(static_cast<int>(this->value) % static_cast<int>(rhs.value)));
+		return this->factory.createOperand(rhs.getType(), std::to_string(static_cast<int>(this->value) % static_cast<int>(static_cast<Operand<Double> const &>(rhs).getValue())));
 	}
 
 	std::string const & toString( void ) const {
@@ -97,7 +100,7 @@ public:
 
 	class IntegerOnlyException : public std::exception
 	{
-		virtual const char* what() const throw() {return "Operation for Int only has benn called with Float/Double values";}
+		virtual const char* what() const throw() {return "Operation for Int-only has benn called with Float/Double values";}
 	};
 	class ZeroDivisionException : public std::exception
 	{
@@ -108,6 +111,7 @@ private:
 	Operand(void);
 
 	eOperandType	type;
+	double			value;
 	OperandFactory	factory;
 };
 

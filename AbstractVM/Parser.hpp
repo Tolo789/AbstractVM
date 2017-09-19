@@ -39,6 +39,10 @@ public:
 	{
 		virtual const char* what() const throw();
 	};
+	class PrintException : public std::exception
+	{
+		virtual const char* what() const throw();
+	};
 
 private:
 
@@ -57,6 +61,7 @@ private:
 	void ModFunction(std::string param);
 	void PrintFunction(std::string param);
 	void ExitFunction(std::string param);
+	void ClearFunction(std::string param);
 
 	std::list<char>				options;
 	std::list<IOperand const *>	values;

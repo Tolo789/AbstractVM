@@ -83,12 +83,13 @@ std::list<std::string>	AbstractVM::getProgram() const {
 
 int AbstractVM::parseOptions(int argc, char **argv) {
 	int filepathIndex = 0;
-	char okOptions[] = {'h', 'd', 's'};
+	int const okOptionsCount = 3;
+	char okOptions[okOptionsCount] = {'h', 'd', 's'};
 
 	int i = 0;
 	while (++i < argc) {
 		if (argv[i][0] == '-') {
-			if (std::find(okOptions, okOptions + 2, argv[i][1]) != okOptions + 2) {
+			if (std::find(okOptions, okOptions + okOptionsCount, argv[i][1]) != okOptions + okOptionsCount) {
 				if (argv[i][2] != 0) {
 					throw AbstractVM::UnkownOptionException();
 				}
@@ -189,13 +190,8 @@ void	AbstractVM::runVM(void) {
 	}
 	else {
 		this->lexer.execute(this->program, this->options);
-
-		// TODO: parser
 		this->parser.execute(this->program, this->options);
 	}
-
-	// TODO: delete this line
-	// std::cout << std::endl << *this << std::endl;
 
 	return ;
 }

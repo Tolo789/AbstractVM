@@ -1,15 +1,7 @@
-push int32(3)
-push int32(4)
+push int32(40)
+push int8(6)
 dump
-pop
-assert int16(3)
-
-; test
-pop
-push int32(3)
-push int32(4)
-dump
-add
+mod
 dump
 
-
+exit

@@ -38,7 +38,7 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 	std::string					param;
 
 	this->programEnded = false;
-	for (std::list<std::string>::const_iterator lineIterator = program.begin(); lineIterator != program.end(); ++lineIterator) {
+	for (std::list<std::string>::const_iterator lineIterator = program.begin(); lineIterator != program.end() && !this->programEnded; ++lineIterator) {
 		lineCount++;
 		if (*lineIterator == "" or lineIterator->substr(0, 1) == ";")
 			continue ;
@@ -109,7 +109,7 @@ void Parser::DumpFunction(std::string param) {
 		return ;
 
 	for (std::list<IOperand const *>::iterator elem = this->values.begin(); elem != this->values.end(); ++elem) {
-		std::cout << (*elem)->value << std::endl;
+		std::cout << static_cast<Operand<Double> const *>(*elem)->getValue() << std::endl;
 	}
 
 	return;
@@ -127,7 +127,9 @@ void Parser::AssertFunction(std::string param) {
 	std::string	valueStr = this->getOperandValue(param, opType);
 	IOperand const *checkOperand = this->factory.createOperand(opType, valueStr);
 
-	if ((*first)->value != checkOperand->value)
+	double firstVal = static_cast<Operand<Double> const *>(*first)->getValue();
+	double checkVal = static_cast<Operand<Double> const *>(checkOperand)->getValue();
+	if (firstVal != checkVal)
 		throw Parser::AssertException();
 
 	if (find(this->options.begin(), this->options.end(), 's') != this->options.end()) {
@@ -146,19 +148,122 @@ void Parser::AddFunction(std::string param) {
 
 
 	std::list<IOperand const *>::iterator first = this->values.begin();
-	std::list<IOperand const *>::iterator second = first++;
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
 	IOperand const *newOperand = (**first) + (**second);
-
-	std::cout << "Add check: " << std::endl;
-	std::cout << (*first)->toString() << std::endl;
-	std::cout << (*second)->toString() << std::endl;
-	std::cout << newOperand->toString() << std::endl;
 
 	this->values.pop_front();
 	this->values.pop_front();
 	this->values.push_front(newOperand);
 
-	std::cout << "" << std::endl;
+	return;
+}
+
+void Parser::SubFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
+	IOperand const *newOperand = (**first) - (**second);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
+void Parser::MulFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
+	IOperand const *newOperand = (**first) * (**second);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
+void Parser::DivFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
+	IOperand const *newOperand = (**second) / (**first);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
+void Parser::ModFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++(this->values.begin());
+	IOperand const *newOperand = (**second) % (**first);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
+
+	return;
+}
+
+void Parser::PrintFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 1)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	if ((*first)->getType() != Int8)
+		throw Parser::PrintException();
+
+	std::cout << static_cast<char>(static_cast<Operand<Double> const *>(*first)->getValue());
+
+	return;
+}
+
+void Parser::ExitFunction(std::string param) {
+	if (param != "")
+		return ;
+
+	this->programEnded = true;
+
+	return;
+}
+
+void Parser::ClearFunction(std::string param) {
+	if (param != "")
+		return ;
+
+	for (std::list<IOperand const *>::iterator elem = this->values.begin(); elem != this->values.end(); ++elem) {
+		delete(*elem);
+	}
+	this->values.clear();
+
 	return;
 }
 
@@ -181,12 +286,14 @@ std::map<std::string, Parser::instrFuncPointer> const Parser::create_instr_func_
 	m["dump"] = &Parser::DumpFunction;
 	m["assert"] = &Parser::AssertFunction;
 	m["add"] = &Parser::AddFunction;
-	// m["sub"] = &Parser::SubFunction;
-	// m["mul"] = &Parser::MulFunction;
-	// m["div"] = &Parser::DivFunction;
-	// m["mod"] = &Parser::ModFunction;
-	// m["print"] = &Parser::PrintFunction;
-	// m["exit"] = &Parser::ExitFunction;
+	m["sub"] = &Parser::SubFunction;
+	m["mul"] = &Parser::MulFunction;
+	m["div"] = &Parser::DivFunction;
+	m["mod"] = &Parser::ModFunction;
+	m["print"] = &Parser::PrintFunction;
+	m["exit"] = &Parser::ExitFunction;
+	// Bonus
+	m["clear"] = &Parser::ClearFunction;
 
 	return m;
 }
@@ -218,6 +325,10 @@ const char *Parser::StackSizeException::what() const throw() {
 
 const char *Parser::AssertException::what() const throw() {
 		return "Assert instruction detected a difference";
+}
+
+const char *Parser::PrintException::what() const throw() {
+		return "Cannot print, element on stack must be Int8";
 }
 
 // === END EXCEPTIONS ==========================================================
