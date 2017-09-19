@@ -2,8 +2,10 @@
 # define OPERAND_TPP
 # include <iostream>
 # include <sstream>
+# include <math.h>
 # include "IOperand.hpp"
 # include "eOperandType.hpp"
+# include "OperandFactory.hpp"
 
 template<eOperandType T>
 class Operand : public IOperand {
@@ -14,15 +16,10 @@ public:
 		this->type = src->getType();
 	}
 	Operand(std::string value) : type(T) {
-		// TODO: check for overflows
-		// TODO: take only int part for ints
-		this->value = std::stod(value);
-	}
-	Operand(double value) : type(T) {
-		// TODO: check for overflows
-		// TODO: take only int part for ints
-		this->value = value;
-
+		if (T >= Float)
+			this->value = std::stod(value);
+		else
+			this->value = round(std::stod(value));
 	}
 	~Operand(void) {}
 
@@ -37,28 +34,26 @@ public:
 
 	IOperand const * operator+( IOperand const & rhs ) const {
 		if (rhs.getType() < this->getType()) {
-			// TODO: replace Float by this->getType()
-			return new Operand<Float>(this->value + rhs.value);
+			return this->factory.createOperand(this->getType(), std::to_string(this->value + rhs.value));
 		}
 
-		// TODO: replace Double by rhs.getType()
-		return new Operand<Double>(this->value + rhs.value);
+		return this->factory.createOperand(rhs.getType(), std::to_string(this->value + rhs.value));
 	}
 
 	IOperand const * operator-( IOperand const & rhs ) const {
 		if (rhs.getType() < this->getType()) {
-			return new Operand<Float>(this->value - rhs.value);
+			return this->factory.createOperand(this->getType(), std::to_string(this->value - rhs.value));
 		}
 
-		return new Operand<Double>(this->value - rhs.value);
+		return this->factory.createOperand(rhs.getType(), std::to_string(this->value - rhs.value));
 	}
 
 	IOperand const * operator*( IOperand const & rhs ) const {
 		if (rhs.getType() < this->getType()) {
-			return new Operand<Float>(this->value *rhs.value);
+			return this->factory.createOperand(this->getType(), std::to_string(this->value *rhs.value));
 		}
 
-		return new Operand<Double>(this->value * rhs.value);
+		return this->factory.createOperand(rhs.getType(), std::to_string(this->value * rhs.value));
 	}
 
 	IOperand const * operator/( IOperand const & rhs ) const {
@@ -67,10 +62,10 @@ public:
 
 		if (rhs.getType() < this->getType()) {
 
-			return new Operand<Float>(this->value / rhs.value);
+			return this->factory.createOperand(this->getType(), std::to_string(this->value / rhs.value));
 		}
 
-		return new Operand<Double>(this->value / rhs.value);
+		return this->factory.createOperand(rhs.getType(), std::to_string(this->value / rhs.value));
 	}
 
 	IOperand const * operator%( IOperand const & rhs ) const {
@@ -81,12 +76,12 @@ public:
 			if (this->getType() >= Float)
 				throw Operand::IntegerOnlyException();
 
-			return new Operand<Float>(static_cast<double>(static_cast<int>(this->value) % static_cast<int>(rhs.value)));
+			return this->factory.createOperand(this->getType(), std::to_string(static_cast<int>(this->value) % static_cast<int>(rhs.value)));
 		}
 		if (rhs.getType() >= Float)
 			throw Operand::IntegerOnlyException();
 
-		return new Operand<Double>(static_cast<double>(static_cast<int>(this->value) % static_cast<int>(rhs.value)));
+		return this->factory.createOperand(rhs.getType(), std::to_string(static_cast<int>(this->value) % static_cast<int>(rhs.value)));
 	}
 
 	std::string const & toString( void ) const {
@@ -113,6 +108,7 @@ private:
 	Operand(void);
 
 	eOperandType	type;
+	OperandFactory	factory;
 };
 
 #endif

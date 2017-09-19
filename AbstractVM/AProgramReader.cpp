@@ -155,16 +155,7 @@ std::string AProgramReader::getOperandValue(std::string opStr, eOperandType opTy
 	if (!integer || ((opType == Float || opType == Double) && !decimal))
 		throw AProgramReader::OperandValueException();
 
-	// TODO: implement this solution when you do stack operations
-	double valueCheck;
-	try {
-	 	valueCheck = std::stod(value);
-	}
-	catch (std::exception & e) {
-		throw AProgramReader::OperandOverflowException();
-	}
-	if (valueCheck > AProgramReader::MAX_VAL[opType] || valueCheck < (-AProgramReader::MAX_VAL[opType] - 1))
-		throw AProgramReader::OperandOverflowException();
+	this->factory.createOperand(opType, value);
 
 	return value;
 }
@@ -213,7 +204,6 @@ std::map<std::string, eOperandType> const AProgramReader::create_operand_map(voi
 	return m;
 }
 
-double const AProgramReader::MAX_VAL[5] = {std::numeric_limits<char>::max(), std::numeric_limits<short>::max(), std::numeric_limits<int>::max(), std::numeric_limits<float>::max(), std::numeric_limits<double>::max()};
 std::map<std::string, eOperandType> const AProgramReader::OPERAND = AProgramReader::create_operand_map();
 
 // === END STATICVARS ==========================================================
@@ -230,10 +220,6 @@ const char *AProgramReader::ParenthesisException::what() const throw() {
 
 const char *AProgramReader::OperandValueException::what() const throw() {
 		return "Error in the operand value";
-}
-
-const char *AProgramReader::OperandOverflowException::what() const throw() {
-		return "Overflow of operand detected";
 }
 
 // === END EXCEPTIONS ==========================================================

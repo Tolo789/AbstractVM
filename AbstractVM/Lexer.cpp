@@ -68,8 +68,8 @@ void Lexer::execute(std::list<std::string> program, std::list<char> options) {
 					}
 
 					try {
-						eOperandType opType = AProgramReader::getOperandType(*elemIterator);
-						AProgramReader::getOperandValue(*elemIterator, opType);
+						eOperandType opType = this->getOperandType(*elemIterator);
+						this->getOperandValue(*elemIterator, opType);
 					}
 					catch (std::exception & e) {
 						errorList.push_back(Lexer::createError(lineCount, e.what(), *elemIterator, errorList.size()));

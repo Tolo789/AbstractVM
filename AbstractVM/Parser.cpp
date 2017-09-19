@@ -67,7 +67,7 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 			}
 		}
 		try {
-			(this->*instrFunc)(param, options);
+			(this->*instrFunc)(param);
 		}
 		catch (std::exception & e) {
 			throw Parser::ParserException(lineCount, e.what(), *lineIterator);
@@ -79,37 +79,15 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 }
 
 
-IOperand const * Parser::createOperand( eOperandType type, std::string const & value ) const {
-	Parser::opFuncCreatePointer opCreateFunc = Parser::OP_FUNC_MAP.find(type)->second;
-
-	return (this->*opCreateFunc)(value);
-}
-IOperand const * Parser::createInt8( std::string const & value ) const {
-	return new Operand<Int8>(value);
-}
-IOperand const * Parser::createInt16( std::string const & value ) const {
-	return new Operand<Int16>(value);
-}
-IOperand const * Parser::createInt32( std::string const & value ) const {
-	return new Operand<Int32>(value);
-}
-IOperand const * Parser::createFloat( std::string const & value ) const {
-	return new Operand<Float>(value);
-}
-IOperand const * Parser::createDouble( std::string const & value ) const {
-	return new Operand<Double>(value);
-}
-
-
 void Parser::PushFunction(std::string param) {
 	if (param == "")
 		return ;
 
 
-	eOperandType opType = AProgramReader::getOperandType(param);
-	std::string	valueStr = AProgramReader::getOperandValue(param, opType);
+	eOperandType opType = this->getOperandType(param);
+	std::string	valueStr = this->getOperandValue(param, opType);
 
-	IOperand const *newOperand = this->createOperand(opType, valueStr);
+	IOperand const *newOperand = this->factory.createOperand(opType, valueStr);
 	this->values.push_front(newOperand);
 
 	return;
@@ -143,22 +121,19 @@ void Parser::AssertFunction(std::string param) {
 	if (this->values.size() < 1)
 		throw Parser::StackSizeException();
 
-
 	std::list<IOperand const *>::iterator first = this->values.begin();
 
-	eOperandType opType = AProgramReader::getOperandType(param);
-	std::string	valueStr = AProgramReader::getOperandValue(param, opType);
+	eOperandType opType = this->getOperandType(param);
+	std::string	valueStr = this->getOperandValue(param, opType);
+	IOperand const *checkOperand = this->factory.createOperand(opType, valueStr);
 
-	IOperand const *checkOperand = this->createOperand(opType, valueStr);
-
-	if (first.value != checkOperand.value)
+	if ((*first)->value != checkOperand->value)
 		throw Parser::AssertException();
 
 	if (find(this->options.begin(), this->options.end(), 's') != this->options.end()) {
-		if (first.getPrecision() != checkOperand.getPrecision)
+		if ((*first)->getPrecision() != checkOperand->getPrecision())
 			throw Parser::AssertException();
 	}
-
 
 	return;
 }
@@ -171,13 +146,19 @@ void Parser::AddFunction(std::string param) {
 
 
 	std::list<IOperand const *>::iterator first = this->values.begin();
-	std::list<IOperand const *>::iterator second = ++first;
-	IOperand const *newOperand = (*first) + (*second);
+	std::list<IOperand const *>::iterator second = first++;
+	IOperand const *newOperand = (**first) + (**second);
+
+	std::cout << "Add check: " << std::endl;
+	std::cout << (*first)->toString() << std::endl;
+	std::cout << (*second)->toString() << std::endl;
+	std::cout << newOperand->toString() << std::endl;
 
 	this->values.pop_front();
 	this->values.pop_front();
 	this->values.push_front(newOperand);
 
+	std::cout << "" << std::endl;
 	return;
 }
 
@@ -199,7 +180,7 @@ std::map<std::string, Parser::instrFuncPointer> const Parser::create_instr_func_
 	m["pop"] = &Parser::PopFunction;
 	m["dump"] = &Parser::DumpFunction;
 	m["assert"] = &Parser::AssertFunction;
-	// m["add"] = &Parser::AddFunction;
+	m["add"] = &Parser::AddFunction;
 	// m["sub"] = &Parser::SubFunction;
 	// m["mul"] = &Parser::MulFunction;
 	// m["div"] = &Parser::DivFunction;
@@ -211,20 +192,6 @@ std::map<std::string, Parser::instrFuncPointer> const Parser::create_instr_func_
 }
 
 std::map<std::string, Parser::instrFuncPointer> const Parser::INSTR_FUNC_MAP = Parser::create_instr_func_map();
-
-std::map<eOperandType, Parser::opFuncCreatePointer> const Parser::create_op_func_map(void) {
-	std::map<eOperandType, Parser::opFuncCreatePointer> m;
-
-	m[Int8] = &Parser::createInt8;
-	m[Int16] = &Parser::createInt16;
-	m[Int32] = &Parser::createInt32;
-	m[Float] = &Parser::createFloat;
-	m[Double] = &Parser::createDouble;
-
-	return m;
-}
-
-std::map<eOperandType, Parser::opFuncCreatePointer> const Parser::OP_FUNC_MAP = Parser::create_op_func_map();
 
 // === END STATICVARS ==========================================================
 
