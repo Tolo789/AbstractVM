@@ -6,7 +6,7 @@
 // === CONSTRUCTOR =============================================================
 
 Parser::~Parser (void) {
-	for (std::list<IOperand*>::iterator elem = this->values.begin(); elem != this->values.end(); ++elem) {
+	for (std::list<IOperand const *>::iterator elem = this->values.begin(); elem != this->values.end(); ++elem) {
 		delete(*elem);
 	}
 	this->values.clear();
@@ -31,10 +31,10 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 	std::size_t								lineCount = 0;
 	std::size_t								elemCount = 0;
 
-	std::map<std::string, Parser::instrFuncPointer>::const_iterator	instrMapResult;
 	Parser::instrFuncPointer	instrFunc;
-	std::string			param;
+	std::string					param;
 
+	this->programEnded = false;
 	for (std::list<std::string>::const_iterator lineIterator = program.begin(); lineIterator != program.end(); ++lineIterator) {
 		lineCount++;
 		if (*lineIterator == "" or lineIterator->substr(0, 1) == ";")
@@ -43,7 +43,7 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 		if (find(options.begin(), options.end(), 'd') != options.end()) {
 			if (lineCount > 1)
 				std::cout << std::endl;
-			std::cout << "Line n." << lineCount << " - " << *lineIterator << std::endl;
+			std::cout << "Line n." << lineCount << " - " << *lineIterator;
 			std::getline(std::cin, line);
 		}
 
@@ -57,17 +57,22 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 				break ;
 
 			if (elemCount == 1) {
-				instrMapResult = Parser::INSTR_FUNC_MAP.find(*elemIterator);
-				instrFunc = instrMapResult->second;
-				param = instrMapResult->first;
+				instrFunc = Parser::INSTR_FUNC_MAP.find(*elemIterator)->second;
 			}
 			else {
 				param = *elemIterator;
 			}
 		}
-		// std::cout << "Func: " << instrMapResult->first << ", funcName: " << instrMapResult->second << std::endl;
-		(this->*instrFunc)(param);
+		try {
+			(this->*instrFunc)(param, options);
+		}
+		catch (std::exception & e) {
+			throw Parser::ParserException(lineCount, e.what(), *lineIterator);
+		}
 	}
+
+	if (!this->programEnded)
+		throw Parser::ProgramWithoutEndException();
 }
 
 
@@ -93,35 +98,44 @@ IOperand const * Parser::createDouble( std::string const & value ) const {
 }
 
 
-void Parser::PushFunction(std::string param) {
-	std::cout << "Push" << std::endl;
-	if (param != "")
+void Parser::PushFunction(std::string param, std::list<char> options) {
+	if (param == "")
+		return ;
+	if (find(options.begin(), options.end(), 'h') != options.end())
 		return ;
 
 
-	// eOperandType opType = AProgramReader::getOperandType(param);
-	// std::string	valueStr = AProgramReader::getOperandValue(param, opType);
-	//
-	// IOperand newOperand = this->createOperand(opType, valueStr);
-	// std::cout << "Test: " << newOperand->toString() << std::endl;
+	eOperandType opType = AProgramReader::getOperandType(param);
+	std::string	valueStr = AProgramReader::getOperandValue(param, opType);
 
-
+	IOperand const *newOperand = this->createOperand(opType, valueStr);
+	this->values.push_front(newOperand);
 
 	return;
 }
 
-void Parser::PopFunction(std::string param) {
-	std::cout << "Pop" << std::endl;
+void Parser::PopFunction(std::string param, std::list<char> options) {
 	if (param != "")
 		return ;
+	if (find(options.begin(), options.end(), 'h') != options.end())
+		return ;
+
+	if (this->values.size() < 1)
+		throw Parser::StackSizeException();
+	this->values.pop_front();
 
 	return;
 }
 
-void Parser::DumpFunction(std::string param) {
-	std::cout << "Dump" << std::endl;
+void Parser::DumpFunction(std::string param, std::list<char> options) {
 	if (param != "")
 		return ;
+	if (find(options.begin(), options.end(), 'h') != options.end())
+		return ;
+
+	for (std::list<IOperand const *>::iterator elem = this->values.begin(); elem != this->values.end(); ++elem) {
+		std::cout << (*elem)->value << std::endl;
+	}
 
 	return;
 }
@@ -143,14 +157,14 @@ std::map<std::string, Parser::instrFuncPointer> const Parser::create_instr_func_
 	m["push"] = &Parser::PushFunction;
 	m["pop"] = &Parser::PopFunction;
 	m["dump"] = &Parser::DumpFunction;
-	// m["assert"] = 1;
-	// m["add"] = 0;
-	// m["sub"] = 0;
-	// m["mul"] = 0;
-	// m["div"] = 0;
-	// m["mod"] = 0;
-	// m["print"] = 0;
-	// m["exit"] = 0;
+	m["assert"] = &Parser::AssertFunction;
+	m["add"] = &Parser::AddFunction;
+	m["sub"] = &Parser::SubFunction;
+	m["mul"] = &Parser::MulFunction;
+	m["div"] = &Parser::DivFunction;
+	m["mod"] = &Parser::ModFunction;
+	m["print"] = &Parser::PrintFunction;
+	m["exit"] = &Parser::ExitFunction;
 
 	return m;
 }
@@ -174,4 +188,24 @@ std::map<eOperandType, Parser::opFuncCreatePointer> const Parser::OP_FUNC_MAP = 
 // === END STATICVARS ==========================================================
 
 // === EXCEPTIONS ==============================================================
+
+Parser::ParserException::ParserException(int lineCount, std::string errorMsg, std::string strGiven) {
+	this->errorMsg = "RUNTIME ERROR - Line " + std::to_string(lineCount) + " - " + errorMsg + " ('" + strGiven + "' given)";
+}
+
+Parser::ParserException::~ParserException()  _NOEXCEPT{
+}
+
+const char *Parser::ParserException::what() const throw() {
+		return errorMsg.c_str();
+}
+
+const char *Parser::ProgramWithoutEndException::what() const throw() {
+		return "RUNTIME ERROR - Program ended without 'exit' command";
+}
+
+const char *Parser::StackSizeException::what() const throw() {
+		return "Instruction has not enough values on stack to execute";
+}
+
 // === END EXCEPTIONS ==========================================================

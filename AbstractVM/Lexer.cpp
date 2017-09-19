@@ -17,7 +17,7 @@ std::string Lexer::createError(int lineCount, std::string errorMsg, std::string 
 	std::stringstream errorStr;
 	if (listSize > 0)
 		errorStr << std::endl;
-	errorStr << "ERROR - Line " << lineCount << " - " << errorMsg << " ('" << strGiven << "' given)";
+	errorStr << "LEXER ERROR - Line " << lineCount << " - " << errorMsg << " ('" << strGiven << "' given)";
 
 	return errorStr.str();
 }

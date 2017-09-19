@@ -93,7 +93,9 @@ public:
 
 			std::string const *retStr = new std::string(debugStr.str());
 
-			return retStr;
+			std::string const &refStr = *retStr;
+
+			return refStr;
 	}
 
 	class IntegerOnlyException : public std::exception
