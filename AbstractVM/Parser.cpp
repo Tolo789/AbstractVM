@@ -22,8 +22,11 @@ Parser::~Parser (void) {
 // === OTHERS ==================================================================
 
 void Parser::execute(std::list<std::string> program, std::list<char> options) {
-	if (find(options.begin(), options.end(), 'h') != options.end())
-		return ;
+	this->options = options;
+	bool debugMode = false;
+	if (find(this->options.begin(), this->options.end(), 'd') != this->options.end()) {
+		debugMode = true;
+	}
 
 	std::string								line = "";
 	std::list<std::string>					elements;
@@ -40,7 +43,7 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 		if (*lineIterator == "" or lineIterator->substr(0, 1) == ";")
 			continue ;
 
-		if (find(options.begin(), options.end(), 'd') != options.end()) {
+		if (debugMode) {
 			if (lineCount > 1)
 				std::cout << std::endl;
 			std::cout << "Line n." << lineCount << " - " << *lineIterator;
@@ -98,10 +101,8 @@ IOperand const * Parser::createDouble( std::string const & value ) const {
 }
 
 
-void Parser::PushFunction(std::string param, std::list<char> options) {
+void Parser::PushFunction(std::string param) {
 	if (param == "")
-		return ;
-	if (find(options.begin(), options.end(), 'h') != options.end())
 		return ;
 
 
@@ -114,28 +115,68 @@ void Parser::PushFunction(std::string param, std::list<char> options) {
 	return;
 }
 
-void Parser::PopFunction(std::string param, std::list<char> options) {
+void Parser::PopFunction(std::string param) {
 	if (param != "")
 		return ;
-	if (find(options.begin(), options.end(), 'h') != options.end())
-		return ;
-
 	if (this->values.size() < 1)
 		throw Parser::StackSizeException();
+
 	this->values.pop_front();
 
 	return;
 }
 
-void Parser::DumpFunction(std::string param, std::list<char> options) {
+void Parser::DumpFunction(std::string param) {
 	if (param != "")
-		return ;
-	if (find(options.begin(), options.end(), 'h') != options.end())
 		return ;
 
 	for (std::list<IOperand const *>::iterator elem = this->values.begin(); elem != this->values.end(); ++elem) {
 		std::cout << (*elem)->value << std::endl;
 	}
+
+	return;
+}
+
+void Parser::AssertFunction(std::string param) {
+	if (param == "")
+		return ;
+	if (this->values.size() < 1)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+
+	eOperandType opType = AProgramReader::getOperandType(param);
+	std::string	valueStr = AProgramReader::getOperandValue(param, opType);
+
+	IOperand const *checkOperand = this->createOperand(opType, valueStr);
+
+	if (first.value != checkOperand.value)
+		throw Parser::AssertException();
+
+	if (find(this->options.begin(), this->options.end(), 's') != this->options.end()) {
+		if (first.getPrecision() != checkOperand.getPrecision)
+			throw Parser::AssertException();
+	}
+
+
+	return;
+}
+
+void Parser::AddFunction(std::string param) {
+	if (param != "")
+		return ;
+	if (this->values.size() < 2)
+		throw Parser::StackSizeException();
+
+
+	std::list<IOperand const *>::iterator first = this->values.begin();
+	std::list<IOperand const *>::iterator second = ++first;
+	IOperand const *newOperand = (*first) + (*second);
+
+	this->values.pop_front();
+	this->values.pop_front();
+	this->values.push_front(newOperand);
 
 	return;
 }
@@ -158,13 +199,13 @@ std::map<std::string, Parser::instrFuncPointer> const Parser::create_instr_func_
 	m["pop"] = &Parser::PopFunction;
 	m["dump"] = &Parser::DumpFunction;
 	m["assert"] = &Parser::AssertFunction;
-	m["add"] = &Parser::AddFunction;
-	m["sub"] = &Parser::SubFunction;
-	m["mul"] = &Parser::MulFunction;
-	m["div"] = &Parser::DivFunction;
-	m["mod"] = &Parser::ModFunction;
-	m["print"] = &Parser::PrintFunction;
-	m["exit"] = &Parser::ExitFunction;
+	// m["add"] = &Parser::AddFunction;
+	// m["sub"] = &Parser::SubFunction;
+	// m["mul"] = &Parser::MulFunction;
+	// m["div"] = &Parser::DivFunction;
+	// m["mod"] = &Parser::ModFunction;
+	// m["print"] = &Parser::PrintFunction;
+	// m["exit"] = &Parser::ExitFunction;
 
 	return m;
 }
@@ -206,6 +247,10 @@ const char *Parser::ProgramWithoutEndException::what() const throw() {
 
 const char *Parser::StackSizeException::what() const throw() {
 		return "Instruction has not enough values on stack to execute";
+}
+
+const char *Parser::AssertException::what() const throw() {
+		return "Assert instruction detected a difference";
 }
 
 // === END EXCEPTIONS ==========================================================

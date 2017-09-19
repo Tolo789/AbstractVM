@@ -83,7 +83,7 @@ std::list<std::string>	AbstractVM::getProgram() const {
 
 int AbstractVM::parseOptions(int argc, char **argv) {
 	int filepathIndex = 0;
-	char okOptions[] = {'h', 'd'};
+	char okOptions[] = {'h', 'd', 's'};
 
 	int i = 0;
 	while (++i < argc) {
@@ -184,7 +184,8 @@ void	AbstractVM::runVM(void) {
 
 		std::cout << "Options:" << std::endl;
 		std::cout << "\t-h  ->  displays this help menu and exit" << std::endl;
-		std::cout << "\t-d  ->  debug mode while executing the program" << std::endl;
+		std::cout << "\t-d  ->  'debug' mode while executing the program" << std::endl;
+		std::cout << "\t-s  ->  'strict' mode while executing the program" << std::endl;
 	}
 	else {
 		this->lexer.execute(this->program, this->options);

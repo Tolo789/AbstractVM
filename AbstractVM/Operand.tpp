@@ -37,9 +37,11 @@ public:
 
 	IOperand const * operator+( IOperand const & rhs ) const {
 		if (rhs.getType() < this->getType()) {
+			// TODO: replace Float by this->getType()
 			return new Operand<Float>(this->value + rhs.value);
 		}
 
+		// TODO: replace Double by rhs.getType()
 		return new Operand<Double>(this->value + rhs.value);
 	}
 

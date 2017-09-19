@@ -35,10 +35,14 @@ public:
 	{
 		virtual const char* what() const throw();
 	};
+	class AssertException : public std::exception
+	{
+		virtual const char* what() const throw();
+	};
 
 private:
 
-    typedef void (Parser::*instrFuncPointer)(std::string param, std::list<char> options);
+    typedef void (Parser::*instrFuncPointer)(std::string param);
     static std::map<std::string, Parser::instrFuncPointer> const	INSTR_FUNC_MAP;
     static std::map<std::string, Parser::instrFuncPointer> const	create_instr_func_map(void);
 
@@ -53,19 +57,20 @@ private:
 	IOperand const * createFloat( std::string const & value ) const;
 	IOperand const * createDouble( std::string const & value ) const;
 
-	void PushFunction(std::string param, std::list<char> options);
-	void PopFunction(std::string param, std::list<char> options);
-	void DumpFunction(std::string param, std::list<char> options);
-	void AssertFunction(std::string param, std::list<char> options);
-	void AddFunction(std::string param, std::list<char> options);
-	void SubFunction(std::string param, std::list<char> options);
-	void MulFunction(std::string param, std::list<char> options);
-	void DivFunction(std::string param, std::list<char> options);
-	void ModFunction(std::string param, std::list<char> options);
-	void PrintFunction(std::string param, std::list<char> options);
-	void ExitFunction(std::string param, std::list<char> options);
+	void PushFunction(std::string param);
+	void PopFunction(std::string param);
+	void DumpFunction(std::string param);
+	void AssertFunction(std::string param);
+	void AddFunction(std::string param);
+	void SubFunction(std::string param);
+	void MulFunction(std::string param);
+	void DivFunction(std::string param);
+	void ModFunction(std::string param);
+	void PrintFunction(std::string param);
+	void ExitFunction(std::string param);
 
-	std::list<IOperand const *> values;
+	std::list<char>				options;
+	std::list<IOperand const *>	values;
 	bool						programEnded;
 };
 

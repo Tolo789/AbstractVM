@@ -2,5 +2,4 @@ push int32(3)
 push int32(4)
 dump
 pop
-dump
-
+assert int16(3)
