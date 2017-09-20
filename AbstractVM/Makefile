@@ -7,7 +7,8 @@ SRC = $(SDIR)main.cpp \
 	  $(SDIR)AProgramReader.cpp \
 	  $(SDIR)Lexer.cpp \
 	  $(SDIR)Parser.cpp \
-	  $(SDIR)OperandFactory.cpp
+	  $(SDIR)OperandFactory.cpp \
+	  $(SDIR)Color.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

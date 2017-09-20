@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include "AbstractVM.hpp"
+#include "Color.hpp"
 
 // === CONSTRUCTOR =============================================================
 
@@ -83,8 +84,8 @@ std::list<std::string>	AbstractVM::getProgram() const {
 
 int AbstractVM::parseOptions(int argc, char **argv) {
 	int filepathIndex = 0;
-	int const okOptionsCount = 3;
-	char okOptions[okOptionsCount] = {'h', 'd', 's'};
+	int const okOptionsCount = 5;
+	char okOptions[okOptionsCount] = {'h', 'd', 's', 'v', 'V'};
 
 	int i = 0;
 	while (++i < argc) {
@@ -184,9 +185,11 @@ void	AbstractVM::runVM(void) {
 		std::cout << "\t$> ./avm [-option1 -option2 .. -optionN] [filepath]" << std::endl << std::endl;
 
 		std::cout << "Options:" << std::endl;
-		std::cout << "\t-h  ->  displays this help menu and exit" << std::endl;
 		std::cout << "\t-d  ->  'debug' mode while executing the program" << std::endl;
-		std::cout << "\t-s  ->  'strict' mode while executing the program" << std::endl;
+		std::cout << "\t-h  ->  displays this help menu and exit" << std::endl;
+		std::cout << "\t-s  ->  'strict' comparison with 'assert' command" << std::endl;
+		std::cout << "\t-v  ->  displays one-line comments" << std::endl;
+		std::cout << "\t-V  ->  -v option + displays precision with 'dump' command" << std::endl;
 	}
 	else {
 		this->lexer.execute(this->program, this->options);
@@ -229,15 +232,27 @@ std::string const AbstractVM::serialize(void) const {
 // === EXCEPTIONS ==============================================================
 
 const char *AbstractVM::UnkownOptionException::what() const throw() {
-		return "Unknown option given..!";
+	std::string message = Color::Red() + "Unknown option given..!" + Color::Reset();
+	char * cStr = new char [message.length()+1];
+	std::strcpy (cStr, message.c_str());
+
+	return cStr;
 }
 
 const char *AbstractVM::FilepathNumberException::what() const throw() {
-		return "More than one filepath given..!";
+	std::string message = Color::Red() + "More than one filepath given..!" + Color::Reset();
+	char * cStr = new char [message.length()+1];
+	std::strcpy (cStr, message.c_str());
+
+	return cStr;
 }
 
 const char *AbstractVM::FileNameException::what() const throw() {
-		return "Cannot open the file at the given path..!";
+	std::string message = Color::Red() + "Cannot open the file at the given path..!" + Color::Reset();
+	char * cStr = new char [message.length()+1];
+	std::strcpy (cStr, message.c_str());
+
+	return cStr;
 }
 
 // === END EXCEPTIONS ==========================================================

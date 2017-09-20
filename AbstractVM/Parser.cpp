@@ -3,6 +3,7 @@
 #include <math.h>
 #include "Parser.hpp"
 #include "Operand.tpp"
+#include "Color.hpp"
 
 // === CONSTRUCTOR =============================================================
 
@@ -41,13 +42,21 @@ void Parser::execute(std::list<std::string> program, std::list<char> options) {
 	this->programEnded = false;
 	for (std::list<std::string>::const_iterator lineIterator = program.begin(); lineIterator != program.end() && !this->programEnded; ++lineIterator) {
 		lineCount++;
-		if (*lineIterator == "" or lineIterator->substr(0, 1) == ";")
+		if (lineIterator->substr(0, 1) == ";") {
+			if ((find(this->options.begin(), this->options.end(), 'v') != this->options.end()) ||
+				(find(this->options.begin(), this->options.end(), 'V') != this->options.end())) {
+				std::cout << std::endl << Color::Blue() << *lineIterator << Color::Reset() << std::endl;
+			}
+
+			continue ;
+		}
+		else if (*lineIterator == "")
 			continue ;
 
 		if (debugMode) {
 			if (lineCount > 1)
 				std::cout << std::endl;
-			std::cout << "Line n." << lineCount << " - " << *lineIterator;
+			std::cout << "Line n." << lineCount << " - Command: " << *lineIterator;
 			std::getline(std::cin, line);
 		}
 
@@ -109,8 +118,16 @@ void Parser::DumpFunction(std::string param) {
 	if (param != "")
 		return ;
 
+	bool isVerbose = false;
+	if (find(this->options.begin(), this->options.end(), 'V') != this->options.end())
+		isVerbose = true;
+
+	std::string value;
 	for (std::list<IOperand const *>::iterator elem = this->values.begin(); elem != this->values.end(); ++elem) {
-		std::cout << static_cast<Operand<Double> const *>(*elem)->getValue() << std::endl;
+		if (isVerbose)
+			std::cout << (*elem)->toString() << std::endl;
+		else
+			std::cout << static_cast<Operand<Double> const *>(*elem)->getValue() << std::endl;
 	}
 
 	return;
@@ -150,7 +167,7 @@ void Parser::AddFunction(std::string param) {
 
 	std::list<IOperand const *>::iterator first = this->values.begin();
 	std::list<IOperand const *>::iterator second = ++(this->values.begin());
-	IOperand const *newOperand = (**first) + (**second);
+	IOperand const *newOperand = (**second) + (**first);
 
 	this->values.pop_front();
 	this->values.pop_front();
@@ -168,7 +185,7 @@ void Parser::SubFunction(std::string param) {
 
 	std::list<IOperand const *>::iterator first = this->values.begin();
 	std::list<IOperand const *>::iterator second = ++(this->values.begin());
-	IOperand const *newOperand = (**first) - (**second);
+	IOperand const *newOperand = (**second) - (**first);
 
 	this->values.pop_front();
 	this->values.pop_front();
@@ -186,7 +203,7 @@ void Parser::MulFunction(std::string param) {
 
 	std::list<IOperand const *>::iterator first = this->values.begin();
 	std::list<IOperand const *>::iterator second = ++(this->values.begin());
-	IOperand const *newOperand = (**first) * (**second);
+	IOperand const *newOperand = (**second) * (**first);
 
 	this->values.pop_front();
 	this->values.pop_front();
@@ -366,6 +383,14 @@ void Parser::SqrtFunction(std::string param) {
 	return;
 }
 
+std::string Parser::getRuntimeErrorMsg(void) {
+	return Color::Red() + "RUNTIME ERROR" + Color::Reset();
+}
+
+std::string Parser::getGenericErrorMsg(std::string message) {
+	return Color::Yellow() + message + Color::Reset();
+}
+
 std::string const Parser::serialize(void) const {
 	std::stringstream debugStr;
 	debugStr << "Parser:{}";
@@ -409,7 +434,7 @@ std::map<std::string, Parser::instrFuncPointer> const Parser::INSTR_FUNC_MAP = P
 // === EXCEPTIONS ==============================================================
 
 Parser::ParserException::ParserException(int lineCount, std::string errorMsg, std::string strGiven) {
-	this->errorMsg = "RUNTIME ERROR - Line " + std::to_string(lineCount) + " - " + errorMsg + " ('" + strGiven + "' given)";
+	this->errorMsg =  Parser::getRuntimeErrorMsg() + " - Line " + std::to_string(lineCount) + " - " + Parser::getGenericErrorMsg(errorMsg + " ('" + strGiven + "' given)");
 }
 
 Parser::ParserException::~ParserException()  _NOEXCEPT{
@@ -420,7 +445,11 @@ const char *Parser::ParserException::what() const throw() {
 }
 
 const char *Parser::ProgramWithoutEndException::what() const throw() {
-		return "RUNTIME ERROR - Program ended without 'exit' command";
+	std::string message = Parser::getRuntimeErrorMsg() + " - " + Parser::getGenericErrorMsg("Program ended without 'exit' command");
+	char * cStr = new char [message.length()+1];
+	std::strcpy (cStr, message.c_str());
+
+	return cStr;
 }
 
 const char *Parser::StackSizeException::what() const throw() {

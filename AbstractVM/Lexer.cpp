@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include "Lexer.hpp"
+#include "Color.hpp"
 
 // === CONSTRUCTOR =============================================================
 // === ENDCONSTRUCTOR ==========================================================
@@ -17,7 +18,7 @@ std::string Lexer::createError(int lineCount, std::string errorMsg, std::string 
 	std::stringstream errorStr;
 	if (listSize > 0)
 		errorStr << std::endl;
-	errorStr << "LEXER ERROR - Line " << lineCount << " - " << errorMsg << " ('" << strGiven << "' given)";
+	errorStr << Color::Red() << "LEXER ERROR" << Color::Reset() << " - Line " << lineCount << " - " << Color::Yellow() << errorMsg << " ('" << strGiven << "' given)" << Color::Reset();
 
 	return errorStr.str();
 }
@@ -40,7 +41,7 @@ void Lexer::execute(std::list<std::string> program, std::list<char> options) {
 
 	for (lineIterator = program.begin(); lineIterator != program.end(); ++lineIterator) {
 		lineCount++;
-		if (*lineIterator == "" or lineIterator->substr(0, 1) == ";")
+		if (*lineIterator == "" || lineIterator->substr(0, 1) == ";")
 			continue ;
 
 		elements = this->getLineElements(*lineIterator);
@@ -73,6 +74,8 @@ void Lexer::execute(std::list<std::string> program, std::list<char> options) {
 					}
 					catch (std::exception & e) {
 						errorList.push_back(Lexer::createError(lineCount, e.what(), *elemIterator, errorList.size()));
+
+						break ;
 					}
 				}
 				else {
@@ -85,6 +88,8 @@ void Lexer::execute(std::list<std::string> program, std::list<char> options) {
 			}
 			else if (*elemIterator != "" and elemIterator->substr(0, 1) != ";") {
 				errorList.push_back(Lexer::createError(lineCount, "Instruction doesnt need any other parameter", *elemIterator, errorList.size()));
+
+				break ;
 			}
 		}
 	}

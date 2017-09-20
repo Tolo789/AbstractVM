@@ -137,7 +137,7 @@ public:
 
 	std::string const & toString( void ) const {
 			std::stringstream debugStr;
-			debugStr << "Operand:{value:" << this->value << ", type:" << this->type << "}";
+			debugStr << this->value << " (" << this->type << ")";
 
 			std::string const *retStr = new std::string(debugStr.str());
 

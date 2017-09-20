@@ -1,28 +1,70 @@
+; Push / Pop test
+dump
+push float(4.0)
+push double(2.0)
+dump
+pop
+dump
+pop
+
+; Clear test
+push int8(42)
+push int16(42)
+push int32(42)
+dump
+clear
+dump
+
+; Assert test
+clear
+push int32(666)
+dump
+assert int32(666)
+
+; Assert test (-s fail)
+clear
+clear
+push int32(666)
+dump
+assert int16(666)
+
+
 ; Add test
-push int8(-120)
-push int8(40)
+clear
+push int16(4)
+push int8(-12)
 dump
 add
 dump
 
 ; Sub test
 clear
-push int8(120)
-push int32(40)
+push int32(4)
+push int8(-12)
+dump
+sub
 dump
 
 ; Mul test
 clear
+push float(4.0)
 push int8(-12)
-push int8(4)
 dump
 mul
 dump
 
 ; Div test
 clear
-push int8(-120)
-push int8(40)
+push double(4.0)
+push int8(-12)
+dump
+div
+dump
+
+; Div test (with ints)
+clear
+push int16(4)
+push int8(-12)
 dump
 div
 dump
@@ -30,7 +72,7 @@ dump
 ; Mod test
 clear
 push int8(10)
-push int8(4)
+push int16(4)
 dump
 mod
 dump
@@ -43,43 +85,60 @@ dump
 print
 pop
 print
-dump
-
 
 ; And test
 clear
 push int8(19)
-push int8(9)
+push int16(9)
+dump
 and
 dump
 
-; And test
+; Or test
 clear
 push int8(19)
-push int8(9)
+push int32(9)
+dump
 or
 dump
 
-; xor test
+; Xor test
 clear
-push int8(19)
-push int8(9)
+push int16(19)
+push int32(9)
+dump
 xor
 dump
 
-; pow test
+; Pow test
 clear
 push double(32.01)
 push double(1.54)
+dump
 pow
 dump
 
-; sqrt test
+; Pow test (with ints)
 clear
-push double(10.0)
+push int8(2)
+push int32(6)
+dump
+pow
+dump
+
+; Sqrt test
+clear
+push double(10.6)
+dump
 sqrt
 dump
 
+; Sqrt test (with ints)
+clear
+push double(10.6)
+dump
+sqrt
+dump
 
 
 exit

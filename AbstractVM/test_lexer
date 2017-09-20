@@ -1,0 +1,25 @@
+toto
+pu;sh int8(3)
+push
+push ;
+push; int8(6)
+push int16;(7)
+push int16( 8)
+push int16(8 )
+push int32(9
+push float10)
+push double(11) toto
+push int8(11) toto
+push int16(12) to;to
+push int8(666)
+push int8(-666)
+push int32(9.0)
+push float(9)
+push float(9.)
+push float(.9)
+push double(9.0.0)
+push double(-.0)
+add toto
+sub to;to
+mul int32(9)
+assert int9(9)

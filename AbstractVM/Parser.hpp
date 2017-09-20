@@ -44,6 +44,10 @@ public:
 		virtual const char* what() const throw();
 	};
 
+protected:
+	static std::string getRuntimeErrorMsg(void);
+	static std::string getGenericErrorMsg(std::string message);
+
 private:
 
     typedef void (Parser::*instrFuncPointer)(std::string param);
